@@ -88,24 +88,21 @@ Handle<Value> ConnectionObject::connect(const Arguments& args){
 Handle<Value> ConnectionObject::option(const Arguments& args){
 	HandleScope scope;
 	
-	String::Utf8Value str(args[0]);
-	const char * key = *str, * val;
+	ConnectionObject * obj = node::ObjectWrap::Unwrap<ConnectionObject>(args.This());
 	
-	const ConnectionObject * obj = node::ObjectWrap::Unwrap<ConnectionObject>(args.This());
+	String::Utf8Value key(args[0]);
 	
 	switch(args.Length()){
 		case 1: 
-			val = ZOOM_connection_option_get(obj->conn, key);
-			return scope.Close(String::New(val));
+			return scope.Close(String::New(ZOOM_connection_option_get(obj->conn, *key)));
 			break;
 		case 2:
-			String::Utf8Value str2(args[1]);
-			val = *str2;
-			ZOOM_connection_option_set(obj->conn, key, val);
+			String::Utf8Value val2(args[1]);
+			ZOOM_connection_option_set(obj->conn, *key, *val2);
 			return scope.Close(Boolean::New(true));
 			break;
 	}
-
+	
 	return scope.Close(Boolean::New(false));
 }
 

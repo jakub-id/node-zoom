@@ -46,27 +46,88 @@ Handle<Value> ScanSetObject::NewInstance(ZOOM_connection conn, const char * star
 	return scope.Close(instance);
 }
 
-Handle<Value> ScanSetObject::size(const Arguments& args){
-	HandleScope scope;
-	return args.This();
-}
-
 Handle<Value> ScanSetObject::term(const Arguments& args){
 	HandleScope scope;
 	
 	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
-	const char * value_term;
 
 	if(args.Length() != 3){
 		return scope.Close(Boolean::New(false));
 	}
-// 這裡有問題
+	
 	if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber()){
-		value_term = ZOOM_scanset_term(obj->scan, int(args[0]->ToNumber()->Value()), int(args[1]->ToNumber()->Value()), int(args[2]->ToNumber()->Value()));
-		return scope.Close(value_term);
+		const char * value_term;
+		size_t pos, *occ = 0, *len = 0;
+		
+		pos = args[0]->ToNumber()->Value();
+		*occ = args[1]->ToNumber()->Value();
+		*len = args[2]->ToNumber()->Value();
+		
+		value_term = ZOOM_scanset_term(obj->scan, pos, occ, len);
+		return scope.Close(String::New(value_term));
 	}else{
 		return scope.Close(Boolean::New(false));
 	}
 	
 	return args.This();
+}
+
+Handle<Value> ScanSetObject::displayTerm(const Arguments& args){
+	HandleScope scope;
+	
+	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
+
+	if(args.Length() != 3){
+		return scope.Close(Boolean::New(false));
+	}
+	
+	if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber()){
+		const char * display_term;
+		size_t pos, *occ = 0, *len = 0;
+		
+		pos = args[0]->ToNumber()->Value();
+		*occ = args[1]->ToNumber()->Value();
+		*len = args[2]->ToNumber()->Value();
+		
+		display_term = ZOOM_scanset_display_term(obj->scan, pos, occ, len);
+		return scope.Close(String::New(display_term));
+	}else{
+		return scope.Close(Boolean::New(false));
+	}
+	
+	return args.This();
+}
+
+Handle<Value> ScanSetObject::size(const Arguments& args){
+	HandleScope scope;
+	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
+	return scope.Close(Number::New(ZOOM_scanset_size(obj->scan)));
+}
+
+Handle<Value> ScanSetObject::distory(const Arguments& args){
+	HandleScope scope;
+	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
+	ZOOM_scanset_destroy(obj->scan);
+	return args.This();
+}
+
+Handle<Value> ScanSetObject::option(const Arguments& args){
+	HandleScope scope;
+	
+	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
+	
+	String::Utf8Value key(args[0]);
+	
+	switch(args.Length()){
+		case 1: 
+			return scope.Close(String::New(ZOOM_scanset_option_get(obj->scan, *key)));
+			break;
+		case 2:
+			String::Utf8Value val2(args[1]);
+			ZOOM_scanset_option_set(obj->scan, *key, *val2);
+			return scope.Close(Boolean::New(true));
+			break;
+	}
+	
+	return scope.Close(Boolean::New(false));
 }
