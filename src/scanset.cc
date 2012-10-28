@@ -50,24 +50,14 @@ Handle<Value> ScanSetObject::term(const Arguments& args){
 	HandleScope scope;
 	
 	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
-
-	if(args.Length() != 3){
-		return scope.Close(Boolean::New(false));
-	}
 	
-	if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber()){
-		const char * value_term;
-		size_t pos, *occ = 0, *len = 0;
-		
-		pos = args[0]->ToNumber()->Value();
-		*occ = args[1]->ToNumber()->Value();
-		*len = args[2]->ToNumber()->Value();
-		
-		value_term = ZOOM_scanset_term(obj->scan, pos, occ, len);
-		return scope.Close(String::New(value_term));
-	}else{
-		return scope.Close(Boolean::New(false));
-	}
+	const char * value_term;
+	size_t pos, *occ = 0, *len = 0;
+	
+	pos = args[0]->ToNumber()->Value();
+	
+	value_term = ZOOM_scanset_term(obj->scan, pos, occ, len);
+	return scope.Close(String::New(value_term));
 	
 	return args.This();
 }
@@ -76,26 +66,15 @@ Handle<Value> ScanSetObject::displayTerm(const Arguments& args){
 	HandleScope scope;
 	
 	ScanSetObject * obj = node::ObjectWrap::Unwrap<ScanSetObject>(args.This());
-
-	if(args.Length() != 3){
-		return scope.Close(Boolean::New(false));
-	}
 	
-	if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber()){
-		const char * display_term;
-		size_t pos, *occ = 0, *len = 0;
-		
-		pos = args[0]->ToNumber()->Value();
-		*occ = args[1]->ToNumber()->Value();
-		*len = args[2]->ToNumber()->Value();
-		
-		display_term = ZOOM_scanset_display_term(obj->scan, pos, occ, len);
-		return scope.Close(String::New(display_term));
-	}else{
-		return scope.Close(Boolean::New(false));
-	}
+	const char * display_term;
+	size_t pos, *occ = 0, *len = 0;
 	
-	return args.This();
+	pos = args[0]->ToNumber()->Value();
+	
+	display_term = ZOOM_scanset_display_term(obj->scan, pos, occ, len);
+	
+	return scope.Close(String::New(display_term));
 }
 
 Handle<Value> ScanSetObject::size(const Arguments& args){

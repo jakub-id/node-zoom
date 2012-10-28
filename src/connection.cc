@@ -4,9 +4,27 @@ extern "C"{
 }
 #include <node.h>
 #include "scanset.h"
+#include "query.h"
+#include "resultset.h"
 #include "connection.h"
 
 using namespace v8;
+
+bool connection_failed(ZOOM_connection connection, Handle<Value> exception){
+	int error;
+	const char *errmsg, *addinfo;
+	char str[80];
+
+	error = ZOOM_connection_error(connection, &errmsg, &addinfo);
+
+	if (error != 0){
+		sprintf(str, "%s (%d) %s", errmsg, error, addinfo);
+		exception = ThrowException(String::New(str));
+		return true;
+	}
+	
+	return false;
+}
 
 ConnectionObject::ConnectionObject(){};
 ConnectionObject::~ConnectionObject(){};
@@ -66,9 +84,16 @@ Handle<Value> ConnectionObject::NewInstance(const Arguments& args){
 Handle<Value> ConnectionObject::search(const Arguments& args){
 	HandleScope scope;
 	
-	Local<Object> instance = constructor->NewInstance();
+	ConnectionObject * obj = node::ObjectWrap::Unwrap<ConnectionObject>(args.This());
+	QueryObject * query = node::ObjectWrap::Unwrap<QueryObject>(args[0]->ToObject());
+	ZOOM_resultset rs = ZOOM_connection_search(obj->conn, query->q);
+	Handle<Value> exception;
 
-	return scope.Close(instance);
+	if(connection_failed(obj->conn, exception)){
+		return exception;
+	}
+
+	return scope.Close(ResultSetObject::NewInstance(rs));
 }
 
 Handle<Value> ConnectionObject::connect(const Arguments& args){
@@ -77,10 +102,15 @@ Handle<Value> ConnectionObject::connect(const Arguments& args){
 	String::Utf8Value str(args[0]);
 	const char * hostname = *str;
 	int port = args[1]->ToNumber()->Value();
+	Handle<Value> exception;
 	
 	ConnectionObject * obj = node::ObjectWrap::Unwrap<ConnectionObject>(args.This());
 
 	ZOOM_connection_connect(obj->conn, hostname, port);
+
+	if(connection_failed(obj->conn, exception)){
+		return exception;
+	}
 
 	return args.This();
 }
