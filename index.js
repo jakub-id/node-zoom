@@ -1,1 +1,1 @@
-module = module.exports = require('./build/Release/zoom');
+exports = module.exports = require('./lib/');

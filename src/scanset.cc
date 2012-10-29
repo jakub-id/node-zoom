@@ -58,8 +58,6 @@ Handle<Value> ScanSetObject::term(const Arguments& args){
 	
 	value_term = ZOOM_scanset_term(obj->scan, pos, occ, len);
 	return scope.Close(String::New(value_term));
-	
-	return args.This();
 }
 
 Handle<Value> ScanSetObject::displayTerm(const Arguments& args){

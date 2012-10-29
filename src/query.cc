@@ -12,7 +12,7 @@ bool query_failed(int g, char * query, Handle<Value> exception){
 	
 	char str[80];
 	
-	if (g){
+	if (g == -1){
 		sprintf(str, "Wrong query: %s", query);
 		exception = ThrowException(String::New(str));
 		return true;

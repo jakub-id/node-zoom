@@ -3,6 +3,7 @@ extern "C"{
 	#include <yaz/zoom.h>
 }
 #include <node.h>
+#include <string>
 #include "connection.h"
 #include "record.h"
 #include "resultset.h"
@@ -96,9 +97,23 @@ Handle<Value> ResultSetObject::record(const Arguments& args){
 
 Handle<Value> ResultSetObject::records(const Arguments& args){
 	HandleScope scope;
-	ResultSetObject * query = new ResultSetObject();
-	query->Wrap(args.This());
-	return args.This();
+	ResultSetObject * obj = node::ObjectWrap::Unwrap<ResultSetObject>(args.This());
+	size_t index = args[0]->ToNumber()->Value(), counts = args[1]->ToNumber()->Value();
+	ZOOM_record *recs = new ZOOM_record[counts];
+	Local<Array> array = Array::New(counts);
+	
+	ZOOM_resultset_records(obj->rs, recs, index, counts);
+	
+	for (int i = 0; i < counts; i++){
+		int len;
+		const char* data = ZOOM_record_get(recs[i], "raw", &len);
+		array->Set(Number::New(i), String::New(std::string(data, len).c_str()));
+	}
+
+	delete [] recs;
+	recs = NULL;
+
+	return scope.Close(array);
 }
 
 Handle<Value> ResultSetObject::size(const Arguments& args){
