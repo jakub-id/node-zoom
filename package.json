@@ -1,5 +1,5 @@
 {
-  "name": "zoom",
+  "name": "nodezoom",
   "version": "0.0.0",
   "description": "z39.50",
   "main": "index.js",
@@ -17,7 +17,7 @@
     "zoom",
     "yaz"
   ],
-  "author": "poying",
+  "author": "poying <poying.me@gmail.com>",
   "license": "BSD",
   "gypfile": true,
   "readmeFilename": "README.md"
