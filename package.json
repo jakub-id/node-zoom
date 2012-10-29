@@ -1,0 +1,24 @@
+{
+  "name": "zoom",
+  "version": "0.0.0",
+  "description": "z39.50",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/poying/node-zoom.git"
+  },
+  "keywords": [
+    "z39.50",
+    "z3950",
+    "zoom",
+    "yaz"
+  ],
+  "author": "poying",
+  "license": "BSD",
+  "gypfile": true,
+  "readmeFilename": "README.md"
+}
